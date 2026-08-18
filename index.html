@@ -233,10 +233,13 @@ curl -X POST http://127.0.0.1:8788/inbox/default \
         <h2>The local core stays free.</h2>
         <p class="lead" style="margin-bottom:0">Receive, inspect, and verify: free forever. Replay, failure simulation, and export: 30-day trial, then a Pro subscription. Leave your email for launch pricing.</p>
       </div>
-      <!-- TODO: point action at your form provider (Tally, Buttondown, Formspree, ...) -->
-      <form action="#" method="post">
+      <form
+        id="signup"
+        action="https://docs.google.com/forms/d/e/1FAIpQLSfHKoBsWBYdsQHhHMPj5PHNcvJu7iXRJ9sVVLc9krvC33FaEA/formResponse"
+        method="post"
+      >
         <label for="email">Email</label>
-        <input id="email" name="email" type="email" required placeholder="you@company.dev" autocomplete="email" />
+        <input id="email" name="entry.1290669072" type="email" required placeholder="you@company.dev" autocomplete="email" />
         <button class="btn btn-primary" type="submit">Get early access</button>
         <p class="fine">No spam. One email, then silence until it ships.</p>
       </form>
@@ -249,5 +252,19 @@ curl -X POST http://127.0.0.1:8788/inbox/default \
   </footer>
 
 </div>
+<script>
+  // submit to Google Forms without leaving the page; if JS is off, the plain
+  // POST still works and lands on Google's confirmation page
+  const signup = document.getElementById('signup');
+  signup.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const data = new FormData(signup);
+    fetch(signup.action, { method: 'POST', mode: 'no-cors', body: data }).finally(() => {
+      signup.innerHTML =
+        '<p><strong style="color:var(--accent)">You are on the list.</strong></p>' +
+        '<p class="fine">One email when it ships. Meanwhile: <code>npx hook-local</code></p>';
+    });
+  });
+</script>
 </body>
 </html>
