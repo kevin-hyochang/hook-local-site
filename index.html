@@ -200,9 +200,8 @@
 
   <section id="quickstart">
     <h2>Running in under a minute.</h2>
-    <div class="term"><span class="c"># the repository goes public with the beta; setup will look like this:</span>
-git clone https://github.com/kevin-hyochang/hook-local && cd hook-local
-pnpm install && pnpm build && pnpm start
+    <div class="term"><span class="c"># requires Node.js 20+</span>
+npx hook-local
 
 <span class="c"># point any webhook at your inbox, or test it right away:</span>
 curl -X POST http://127.0.0.1:8788/inbox/default \
