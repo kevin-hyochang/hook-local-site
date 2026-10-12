@@ -6,7 +6,15 @@
 <title>hook-local · Debug webhooks on your machine</title>
 <meta name="description" content="hook-local receives, inspects, verifies, and replays webhooks locally. Payloads live in a SQLite file on your laptop, not someone's cloud." />
 <meta property="og:title" content="hook-local" />
-<meta property="og:description" content="The local-first webhook debugger: receive, inspect, verify signatures, and replay, all on your machine." />
+<meta property="og:description" content="The local-first webhook debugger: receive, inspect, verify signatures, and replay, all on your machine. Free core, Pro is $39 once." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://kevin-hyochang.github.io/hook-local-site/" />
+<!-- crawlers need an absolute URL; this is site/assets/events.png once deployed -->
+<meta property="og:image" content="https://kevin-hyochang.github.io/hook-local-site/assets/events.png" />
+<meta property="og:image:width" content="2560" />
+<meta property="og:image:height" content="1600" />
+<meta property="og:image:alt" content="hook-local event list showing captured Stripe, Slack and GitHub webhooks with signature results" />
+<meta name="twitter:card" content="summary_large_image" />
 <style>
   :root {
     --bg: #0b1220;
@@ -46,7 +54,7 @@
   .btn {
     display: inline-block; border-radius: var(--radius); padding: 10px 18px;
     font-weight: 600; font-size: 15px; text-decoration: none; border: none;
-    cursor: pointer; font-family: inherit;
+    cursor: pointer; font-family: inherit; white-space: nowrap;
     transition: filter 160ms, transform 120ms;
   }
   .btn:active { transform: translateY(1px); }
@@ -76,6 +84,8 @@
     box-shadow: 0 24px 60px rgba(3, 8, 20, 0.55);
   }
   .shot img { display: block; width: 100%; height: auto; }
+  /* detail.png is a full-page capture; show the diagnosis, not 6000px of it */
+  .shot-crop img { aspect-ratio: 16 / 10; object-fit: cover; object-position: 50% 70%; }
 
   @media (prefers-reduced-motion: no-preference) {
     .hero > * { animation: rise 600ms cubic-bezier(0.16, 1, 0.3, 1) both; }
@@ -114,34 +124,43 @@
   .vs-row strong { display: block; font-size: 16px; margin-bottom: 2px; }
   .vs-row span { color: var(--muted); font-size: 15px; }
 
-  /* early access */
-  .signup {
-    background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 40px; display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; align-items: center;
+  /* pricing */
+  .plans { display: grid; grid-template-columns: 1fr 1.15fr; gap: 16px; align-items: start; }
+  .plan {
+    border: 1px solid var(--border); border-radius: var(--radius); padding: 28px;
   }
-  .signup form { display: grid; gap: 8px; }
-  .signup label { font-size: 14px; color: var(--muted); }
-  .signup input {
-    background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
-    color: var(--fg); padding: 12px 14px; font: inherit; width: 100%;
+  .plan-pro {
+    background: linear-gradient(160deg, rgba(34, 197, 94, 0.09), transparent 55%), var(--panel);
+    border-color: #2f5b45;
   }
-  .signup input::placeholder { color: #64779a; }
-  .fine { color: var(--muted); font-size: 13px; margin: 6px 0 0; }
+  .plan h3 { margin: 0; font-size: 17px; }
+  .price { font-size: 40px; font-weight: 700; letter-spacing: -0.03em; margin: 4px 0 2px; }
+  .price span { font-size: 15px; font-weight: 400; letter-spacing: 0; color: var(--muted); margin-left: 6px; }
+  .plan ul { margin: 18px 0 22px; padding-left: 20px; color: var(--muted); font-size: 15px; }
+  .plan li { margin: 6px 0; }
+  .plan li::marker { color: var(--accent); }
+  .fine { color: var(--muted); font-size: 13.5px; margin: 12px 0 0; }
+  .fine a, .plan a:not(.btn) { color: var(--fg); }
 
   footer {
     border-top: 1px solid var(--border); padding: 28px 0 40px; margin-top: 40px;
-    display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
-    color: var(--muted); font-size: 14px;
+    display: grid; gap: 12px; color: var(--muted); font-size: 14px;
   }
+  footer nav { height: auto; justify-content: flex-start; gap: 20px; flex-wrap: wrap; }
   footer a { color: var(--muted); }
   footer a:hover { color: var(--fg); }
+  .biz { margin: 0; font-size: 13px; line-height: 1.8; }
 
   @media (max-width: 860px) {
     .hero { grid-template-columns: 1fr; padding: 40px 0 56px; }
     .bento { grid-template-columns: 1fr; }
     .cell-wide { grid-column: span 1; grid-template-columns: 1fr; }
-    .signup { grid-template-columns: 1fr; padding: 28px; }
+    .plans { grid-template-columns: 1fr; }
     section { padding: 52px 0; }
+  }
+  @media (max-width: 480px) {
+    /* the hero's "Try it free" already goes there; keeps the buy button on one line */
+    .nav-quickstart { display: none; }
   }
 </style>
 </head>
@@ -151,8 +170,9 @@
   <nav>
     <a class="logo" href="#">hook<em>-local</em></a>
     <div class="nav-right">
-      <a class="nav-link" href="#quickstart">Quickstart</a>
-      <a class="btn btn-primary" href="#early-access">Get early access</a>
+      <a class="nav-link nav-quickstart" href="#quickstart">Quickstart</a>
+      <a class="nav-link" href="#pricing">Pricing</a>
+      <a class="btn btn-primary" href="https://etudes6.gumroad.com/l/vhdvg">Buy Pro for $39</a>
     </div>
   </nav>
 
@@ -161,12 +181,12 @@
       <h1>Debug webhooks <em>on your machine.</em></h1>
       <p>hook-local receives, inspects, verifies, and replays webhooks locally. Payloads live in a SQLite file on your laptop, not someone's cloud.</p>
       <div class="hero-ctas">
-        <a class="btn btn-primary" href="#early-access">Get early access</a>
-        <a class="btn btn-ghost" href="#quickstart">See how it works</a>
+        <a class="btn btn-primary" href="#quickstart">Try it free</a>
+        <a class="btn btn-ghost" href="#pricing">See pricing</a>
       </div>
     </div>
     <div class="shot">
-      <img src="assets/events.png" alt="hook-local event list showing captured webhooks with verified and replayed badges" width="1280" height="640" />
+      <img src="assets/events.png" alt="hook-local event list showing captured webhooks with verified and replayed badges" width="1280" height="800" />
     </div>
   </header>
 
@@ -179,8 +199,8 @@
           <h3>Byte-exact signature verification</h3>
           <p>HMAC-SHA256 over the raw request body with a timing-safe compare. Configure the header, prefix, and encoding per service, then see the received and computed signatures side by side. You learn why a signature fails, not just that it failed.</p>
         </div>
-        <div class="shot">
-          <img src="assets/detail.png" alt="Event detail view with headers, raw body, and a valid signature verification result" width="1280" height="760" loading="lazy" />
+        <div class="shot shot-crop">
+          <img src="assets/detail.png" alt="Event detail view: a GitHub signature that does not match, with the likely cause named and a fix to copy" width="1280" height="3028" loading="lazy" />
         </div>
       </div>
       <div class="cell">
@@ -227,44 +247,50 @@ curl -X POST http://127.0.0.1:8788/inbox/default \
     </div>
   </section>
 
-  <section id="early-access">
-    <div class="signup">
-      <div>
-        <h2>The local core stays free.</h2>
-        <p class="lead" style="margin-bottom:0">Receive, inspect, and verify: free forever. Replay, failure simulation, and export: 30-day trial, then a Pro subscription. Leave your email for launch pricing.</p>
+  <section id="pricing">
+    <h2>Free to use. $39 once for Pro.</h2>
+    <p class="lead">Every machine starts with a 30-day Pro trial, no card needed. When it ends, the free tier keeps working and every event you captured stays.</p>
+    <div class="plans">
+      <div class="plan">
+        <h3>Free</h3>
+        <p class="price">$0<span>forever, personal and commercial use</span></p>
+        <ul>
+          <li>Receive webhooks locally, or through a public tunnel</li>
+          <li>Inspect headers, the raw body, and parsed JSON</li>
+          <li>Verify HMAC signatures (generic, Stripe, Slack) and see the likely cause and a fix when one fails</li>
+          <li>Diff two events, generate a repro snippet or a handler stub</li>
+          <li>Share a plain, HTML, or password-protected report, plus the daily health panel</li>
+        </ul>
       </div>
-      <form
-        id="signup"
-        action="https://docs.google.com/forms/d/e/1FAIpQLSfHKoBsWBYdsQHhHMPj5PHNcvJu7iXRJ9sVVLc9krvC33FaEA/formResponse"
-        method="post"
-      >
-        <label for="email">Email</label>
-        <input id="email" name="entry.1290669072" type="email" required placeholder="you@company.dev" autocomplete="email" />
-        <button class="btn btn-primary" type="submit">Get early access</button>
-        <p class="fine">No spam. One email, then silence until it ships.</p>
-      </form>
+      <div class="plan plan-pro">
+        <h3>Pro</h3>
+        <p class="price">$39<span>one-time payment</span></p>
+        <ul>
+          <li>Verify every delivery as it arrives, with a desktop alert when one fails</li>
+          <li>Replay to your endpoint with re-signing, retries, and failure simulation</li>
+          <li>Shrink a failing payload to the smallest body that still breaks</li>
+          <li>Analyse many events at once: field values, TypeScript types, shape checks</li>
+          <li>The dashboard and 30 days of daily history instead of 7</li>
+          <li>Export to CI tests, encrypted share packages, or the whole dataset</li>
+        </ul>
+        <a class="btn btn-primary" href="https://etudes6.gumroad.com/l/vhdvg">Buy Pro for $39</a>
+        <p class="fine">Perpetual license with 12 months of updates, for one person on up to 2 personal machines. Checkout by Gumroad. Your key arrives by email within one business day. Refund within 30 days, no questions asked.</p>
+        <p class="fine">Buying means you accept the <a href="terms.html">Terms</a>. See also the <a href="refund.html">Refund policy</a> and <a href="privacy.html">Privacy policy</a>.</p>
+      </div>
     </div>
   </section>
 
   <footer>
-    <span>hook-local · runs entirely on your machine</span>
-    <span>© 2026 kevin-hyochang</span>
+    <nav aria-label="Legal">
+      <a href="terms.html">Terms</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="refund.html">Refund policy</a>
+      <a href="mailto:etudes0803@gmail.com">etudes0803@gmail.com</a>
+    </nav>
+    <p class="biz" lang="ko">상호 Chordy Studio | 대표 한효창 | 사업자등록번호 584-09-03298<br />주소 경기도 이천시 경충대로2092번길 31, 902호 | 문의 etudes0803@gmail.com</p>
+    <span>© 2026 Chordy Studio. hook-local runs entirely on your machine.</span>
   </footer>
 
 </div>
-<script>
-  // submit to Google Forms without leaving the page; if JS is off, the plain
-  // POST still works and lands on Google's confirmation page
-  const signup = document.getElementById('signup');
-  signup.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const data = new FormData(signup);
-    fetch(signup.action, { method: 'POST', mode: 'no-cors', body: data }).finally(() => {
-      signup.innerHTML =
-        '<p><strong style="color:var(--accent)">You are on the list.</strong></p>' +
-        '<p class="fine">One email when it ships. Meanwhile: <code>npx hook-local</code></p>';
-    });
-  });
-</script>
 </body>
 </html>
